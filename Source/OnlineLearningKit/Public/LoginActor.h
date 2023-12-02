@@ -19,5 +19,5 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 private:
-	PlayFabClientPtr clientAPI = nullptr;
+	PlayFabClientPtr ClientAPI = nullptr;
 };

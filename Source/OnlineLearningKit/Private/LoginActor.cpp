@@ -10,13 +10,13 @@ void ALoginActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	clientAPI = IPlayFabModuleInterface::Get().GetClientAPI();
+	ClientAPI = IPlayFabModuleInterface::Get().GetClientAPI();
 
 	PlayFab::ClientModels::FLoginWithCustomIDRequest request;
 	request.CustomId = TEXT("OnlineLearningKit");
 	request.CreateAccount = true;
 
-	clientAPI->LoginWithCustomID(request,
+	ClientAPI->LoginWithCustomID(request,
 		PlayFab::UPlayFabClientAPI::FLoginWithCustomIDDelegate::CreateUObject(this, &ALoginActor::OnSuccess),
 		PlayFab::FPlayFabErrorDelegate::CreateUObject(this, &ALoginActor::OnError)
 		);
@@ -32,7 +32,7 @@ void ALoginActor::OnError(const PlayFab::FPlayFabCppError& ErrorResult) const
 	UE_LOG(LogTemp, Error, TEXT("Unknown nightmare with this one."));
 }
 
-void ALoginActor::Tick(float DeltaSeconds)
+void ALoginActor::Tick(const float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 }
