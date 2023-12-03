@@ -95,9 +95,6 @@ Plugins/**/Binaries/*
 Plugins/**/Intermediate/*
 
 ### Rider ###
-.idea
-
-### Visual Studio Code ###
-.vscode
+.idea/
 
 # End of https://www.toptal.com/developers/gitignore/api/unrealengine
