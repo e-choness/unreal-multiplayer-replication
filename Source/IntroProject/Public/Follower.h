@@ -8,6 +8,14 @@
 #include "Components/StaticMeshComponent.h"
 #include "Follower.generated.h"
 
+// UENUM(BlueprintType)
+// enum EColors
+// {
+// 	Red UMETA(DisplayName = "Red"),
+// 	Green UMETA(DisplayName = "Green"),
+// 	Blue UMETA(DisplayName = "Blue")
+// };
+
 UCLASS()
 class INTROPROJECT_API AFollower : public APawn
 {

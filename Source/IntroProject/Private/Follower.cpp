@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "IntroProject/Public/Follower.h"
+#include "Logging/StructuredLog.h"
 
 // Sets default values
 AFollower::AFollower()
@@ -16,6 +17,27 @@ AFollower::AFollower()
 	Camera->FieldOfView = 120.f;
 	Camera->SetupAttachment(CameraMesh);
 	Camera->SetRelativeLocation(FVector(100.0f, 0.0f, 50.0f));
+
+    const auto Vector = FVector(0.0f, 0.0f, 0.0f);
+	UE_LOGFMT(LogTemp, Log, "The vector value is: {0}", Vector.ToString());
+
+	auto Array = TArray<int>();
+	Array.Init(10, 5);
+	for(auto& Num : Array)
+	{
+		UE_LOGFMT(LogTemp, Log, "The array element is: {0}", Num);
+	}
+
+	FString Arr[] = {TEXT("of"), TEXT("Tomorrow")};
+
+	for(auto& Txt: Arr)
+	{
+		UE_LOGFMT(LogTemp, Log, "The array element is: {0}", Txt);
+	}
+
+	// auto Color = EColors();
+	// UE_LOGFMT(LogTemp, Log, "The enum colors are: {0} {1} {2}", Color);
+	
 }
 
 // Called when the game starts or when spawned
