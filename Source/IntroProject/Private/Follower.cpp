@@ -9,10 +9,12 @@ AFollower::AFollower()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Create components
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+    CameraMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CameraMesh"));
+    Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 
-	//  Setup camera
+    //  Setup camera
 	Camera->FieldOfView = 120.f;
+	Camera->SetupAttachment(CameraMesh);
 	Camera->SetRelativeLocation(FVector(100.0f, 0.0f, 50.0f));
 }
 
