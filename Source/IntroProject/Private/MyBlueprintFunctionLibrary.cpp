@@ -14,40 +14,41 @@ double UMyBlueprintFunctionLibrary::GetMyPhi()
 
 FAverages UMyBlueprintFunctionLibrary::CalculateAverages(const TArray<double> InValues)
 {
-	// Calculate mean;
-	int32 Sum = 0;
-	for(auto& Num: InValues)
-	{
-		Sum += Num;
-	}
-	double Mean = Sum/InValues.Num();
-
-	// Calculate mode
+	// Declare 
+	TMap<double, int32> Map;
+	auto TempArray = InValues;
+	
+	double Mean = 0.0f;
 	double Mode = 0.0f;
-	auto Map = TMap<double, int32>();
-	for(const auto& Num : InValues)
+	double Median = 0.0f;
+	
+	double Sum = 0;
+	const int32 Count = TempArray.Num();
+
+	if(Count == 0) return FAverages(Mean, Mode, Median);
+
+	TempArray.Sort();
+	for(const auto& Num: TempArray)
 	{
-		if(!Map.FindKey(Num))
+		// Sum is for calculating Mean
+		Sum += Num;
+
+		// 
+		if(Map.Contains(Num))
+		{
+			Map[Num] ++;
+		}else
 		{
 			Map.Add(Num, 1);
 		}
-		else
-		{
-			Map[Num] += 1;
-		}
 	}
 
-	int Max = 0;
-	for(const auto& Pair: Map)
-	{
-		if(Pair.Value > Max)
-		{
-			Max = Pair.Value;
-			Mode = Pair.Key;
-		}
-	}
+	Mean = Sum/static_cast<double>(Count);
 
+	// Sort 
+	Map.ValueSort([](int32 A, int32 B){return A>B; });
+
+	// TArray<TPair<int32, int32> Modals = Map.Array();
 	
-	
-	return FAverages
+	return FAverages(Mean,Mode, Median);
 }
