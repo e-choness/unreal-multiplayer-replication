@@ -48,7 +48,36 @@ FAverages UMyBlueprintFunctionLibrary::CalculateAverages(const TArray<double> In
 	// Sort 
 	Map.ValueSort([](int32 A, int32 B){return A>B; });
 
-	// TArray<TPair<int32, int32> Modals = Map.Array();
+	auto Modals = Map.Array();
+
+	if(Modals[0].Value == 1)
+	{
+		// If the first value is 1, every element is unique
+		// In this case, mode is the same as mean.
+		Mode = Mean;
+	}else
+	{
+		int32 ModalEntries = 1;
+		double ModalSum = Modals[0].Key;
+		auto HighestNum = Modals[0].Value;
+
+		for(const auto& Pair: Modals)
+		{
+			if(Pair.Value != HighestNum)
+			{
+				break;
+			}
+			ModalSum += Pair.Key;
+			ModalEntries ++;
+		}
+
+		Mode = ModalSum/ static_cast<double>(ModalEntries);
+	}
+
+	// Calculate median
+	Median = Count % 2 != 0
+		? TempArray[Count/2]
+		: (TempArray[(Count/2)-1] + TempArray[Count / 2]) / 2;
 	
 	return FAverages(Mean,Mode, Median);
 }
