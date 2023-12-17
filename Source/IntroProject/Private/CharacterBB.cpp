@@ -3,6 +3,8 @@
 
 #include "CharacterBB.h"
 
+#include "InputActionValue.h"
+
 // Sets default values
 ACharacterBB::ACharacterBB()
 {
@@ -31,4 +33,6 @@ void ACharacterBB::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
+
+
 
