@@ -14,6 +14,7 @@
 // Forward Declarations
 class UEnhancedInputComponent;
 class ACharacterBB;
+class UInputAction;
 class UInputMappingContext;
 
 UCLASS(Abstract)
@@ -49,8 +50,11 @@ private:
 	UPROPERTY()
 	ACharacterBB* PlayerCharacter = nullptr;
 
+	UFUNCTION(Blueprintable)
 	void HandleMove(const FInputActionValue& InputActionValue);
+	UFUNCTION(Blueprintable)
 	void HandleLook(const FInputActionValue& InputActionValue);
+	UFUNCTION(Blueprintable)
 	void HandleJump();
 	
 	GENERATED_BODY()
