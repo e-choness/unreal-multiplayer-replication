@@ -18,7 +18,8 @@ public class eos : ModuleRules
 			"OnlineServicesInterface",
 			"CoreOnline",
 			"OnlineSubsystem",
-			"OnlineSubsystemEOS"
+			"OnlineSubsystemEOS",
+			"OnlineSubsystemUtils"
 		});
 	}
 }
