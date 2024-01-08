@@ -8,6 +8,18 @@ public class eos : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core", 
+			"CoreUObject", 
+			"Engine", 
+			"InputCore", 
+			"EnhancedInput",
+			"OnlineServicesInterface",
+			"CoreOnline",
+			"OnlineSubsystem",
+			"OnlineSubsystemEOS",
+			"OnlineSubsystemUtils"
+		});
 	}
 }
