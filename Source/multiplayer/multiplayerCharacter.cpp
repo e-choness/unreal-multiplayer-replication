@@ -98,7 +98,8 @@ void AmultiplayerCharacter::OnHealthUpdate() const
 	// Server-specific functionality
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		FString HealthMessage = FString::Printf("%ls now has %f health remaining.", *GetFName().ToString(), CurrentHealth);
+		const FString HealthMessage = FString::Printf(TEXT("Client %ls has %f health remaining."), *GetFName().ToString(), CurrentHealth);
+		GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Blue, HealthMessage);
 	}
 
 	// Functions that occur on all machines
