@@ -3,13 +3,13 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class multiplayerTarget : TargetRules
+public class prototypeEditorTarget : TargetRules
 {
-	public multiplayerTarget(TargetInfo Target) : base(Target)
+	public prototypeEditorTarget(TargetInfo Target) : base(Target)
 	{
-		Type = TargetType.Game;
+		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V4;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_3;
-		ExtraModuleNames.Add("multiplayer");
+		ExtraModuleNames.Add("prototype");
 	}
 }
