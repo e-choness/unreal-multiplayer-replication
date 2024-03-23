@@ -1,14 +1,11 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "multiplayerCharacter.h"
+#include "prototypeCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Net/UnrealNetwork.h"
-#include "Engine/Engine.h"
-#include "ThirdPersonProjectile.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -17,9 +14,9 @@
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
-// AmultiplayerCharacter
+// AprototypeCharacter
 
-AmultiplayerCharacter::AmultiplayerCharacter()
+AprototypeCharacter::AprototypeCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -53,24 +50,11 @@ AmultiplayerCharacter::AmultiplayerCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	// Initialize the player's health
-	MaxHealth = 100.0f;
-	CurrentHealth = MaxHealth;
-
-	// Initialize projectile class
-	ProjectileClass = AThirdPersonProjectile::StaticClass();
-
-	// Initialize fire rate
-	FireRate = 0.25f;
-
-	// Initialize is firing weapon
-	bIsFiringWeapon = false;
-
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
-void AmultiplayerCharacter::BeginPlay()
+void AprototypeCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
@@ -85,62 +69,10 @@ void AmultiplayerCharacter::BeginPlay()
 	}
 }
 
-void AmultiplayerCharacter::OnRep_CurrentHealth() const
-{
-	OnHealthUpdate();
-}
-
-void AmultiplayerCharacter::OnHealthUpdate() const
-{
-	// Client-specific functionality
-	if(IsLocallyControlled())
-	{
-		const FString HealthMessage = FString::Printf(TEXT("You now have %f health reamaining."), CurrentHealth);
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, HealthMessage);
-
-		if(CurrentHealth <= 0)
-		{
-			const FString DeathMessage = FString::Printf(TEXT("You have been killed."));
-			GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Red, DeathMessage);
-		}
-	}
-
-	// Server-specific functionality
-	if(GetLocalRole() == ROLE_Authority)
-	{
-		const FString HealthMessage = FString::Printf(TEXT("Client %ls has %f health remaining."), *GetFName().ToString(), CurrentHealth);
-		GEngine->AddOnScreenDebugMessage(-1,5.f, FColor::Blue, HealthMessage);
-	}
-
-	// Functions that occur on all machines
-	/*
-	 *  Any special functionality that should occur as a result of damage or death should be placed here.
-	 */
-	
-}
-
-void AmultiplayerCharacter::SetCurrentHealth(float healthValue)
-{
-	// Only updates when the server receives the damage
-	if(GetLocalRole() == ROLE_Authority)
-	{
-		CurrentHealth = FMath::Clamp(healthValue, 0.0f, MaxHealth);
-		OnHealthUpdate();
-	}
-}
-
-float AmultiplayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
-	AController* EventInstigator, AActor* DamageCauser)
-{
-	const float DamageApplied = CurrentHealth - DamageAmount;
-	SetCurrentHealth(DamageApplied);
-	return DamageApplied;
-}
-
 //////////////////////////////////////////////////////////////////////////
 // Input
 
-void AmultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AprototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
@@ -150,20 +82,18 @@ void AmultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AmultiplayerCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AprototypeCharacter::Move);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AmultiplayerCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AprototypeCharacter::Look);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
-
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AmultiplayerCharacter::StartFire);
 }
 
-void AmultiplayerCharacter::Move(const FInputActionValue& Value)
+void AprototypeCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
@@ -186,7 +116,7 @@ void AmultiplayerCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void AmultiplayerCharacter::Look(const FInputActionValue& Value)
+void AprototypeCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -197,46 +127,4 @@ void AmultiplayerCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
-}
-
-//////////////////////////////////////////////////////////////////////////
-// Replicated Properties
-
-void AmultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// Replicate current health
-	DOREPLIFETIME(AmultiplayerCharacter, CurrentHealth);
-}
-
-void AmultiplayerCharacter::StartFire()
-{
-	if(!bIsFiringWeapon)
-	{
-		bIsFiringWeapon = true;
-		UWorld* World = GetWorld();
-		World->GetTimerManager().SetTimer(FiringTimer, this, &AmultiplayerCharacter::StopFire, FireRate, false);
-		HandleFire();
-	}
-}
-
-void AmultiplayerCharacter::StopFire()
-{
-	bIsFiringWeapon = false;
-}
-
-void AmultiplayerCharacter::HandleFire_Implementation()
-{
-	FVector spawnLocation = GetActorLocation() + GetControlRotation().Vector() * 100.0f + GetActorUpVector() * 50.0f;
-	FRotator spawnRotation = GetControlRotation();
-
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Instigator = GetInstigator();
-	SpawnParameters.Owner = this;
-
-	AThirdPersonProjectile* spawnedProjectile = GetWorld()->SpawnActor<AThirdPersonProjectile>(
-		spawnLocation,
-		spawnRotation,
-		SpawnParameters);
 }

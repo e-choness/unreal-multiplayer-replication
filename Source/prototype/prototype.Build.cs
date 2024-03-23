@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class multiplayer : ModuleRules
+public class prototype : ModuleRules
 {
-	public multiplayer(ReadOnlyTargetRules Target) : base(Target)
+	public prototype(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
