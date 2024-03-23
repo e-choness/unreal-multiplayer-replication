@@ -43,6 +43,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	// Called when the object lifetime ends.
+	virtual void Destroyed() override;
+
+	// Projectile impact on object event
+	UFUNCTION(Category="Projectile")
+	void OnProjectileImpact(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult &Hit);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
