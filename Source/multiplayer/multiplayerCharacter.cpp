@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
+#include "ThirdPersonProjectile.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -55,6 +56,15 @@ AmultiplayerCharacter::AmultiplayerCharacter()
 	// Initialize the player's health
 	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
+
+	// Initialize projectile class
+	ProjectileClass = AThirdPersonProjectile::StaticClass();
+
+	// Initialize fire rate
+	FireRate = 0.25f;
+
+	// Initialize is firing weapon
+	bIsFiringWeapon = false;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -149,6 +159,8 @@ void AmultiplayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AmultiplayerCharacter::StartFire);
 }
 
 void AmultiplayerCharacter::Move(const FInputActionValue& Value)
@@ -196,4 +208,35 @@ void AmultiplayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 	// Replicate current health
 	DOREPLIFETIME(AmultiplayerCharacter, CurrentHealth);
+}
+
+void AmultiplayerCharacter::StartFire()
+{
+	if(!bIsFiringWeapon)
+	{
+		bIsFiringWeapon = true;
+		UWorld* World = GetWorld();
+		World->GetTimerManager().SetTimer(FiringTimer, this, &AmultiplayerCharacter::StopFire, FireRate, false);
+		HandleFire();
+	}
+}
+
+void AmultiplayerCharacter::StopFire()
+{
+	bIsFiringWeapon = false;
+}
+
+void AmultiplayerCharacter::HandleFire_Implementation()
+{
+	FVector spawnLocation = GetActorLocation() + GetControlRotation().Vector() * 100.0f + GetActorUpVector() * 50.0f;
+	FRotator spawnRotation = GetControlRotation();
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Instigator = GetInstigator();
+	SpawnParameters.Owner = this;
+
+	AThirdPersonProjectile* spawnedProjectile = GetWorld()->SpawnActor<AThirdPersonProjectile>(
+		spawnLocation,
+		spawnRotation,
+		SpawnParameters);
 }
