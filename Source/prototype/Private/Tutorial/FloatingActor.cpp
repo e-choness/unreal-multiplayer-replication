@@ -3,6 +3,8 @@
 
 #include "Tutorial/FloatingActor.h"
 
+#include "Net/UnrealNetwork.h"
+
 // Sets default values
 AFloatingActor::AFloatingActor()
 {
@@ -10,15 +12,28 @@ AFloatingActor::AFloatingActor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Initialize Static Mesh Component
-	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	VisualMesh->SetupAttachment(RootComponent); // Attach the Static Mesh Component to the root actor, aka Floating Actor
+	OurVisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	OurVisualMesh->SetupAttachment(RootComponent); // Attach the Static Mesh Component to the root actor, aka Floating Actor
 	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
 
 	if(CubeVisualAsset.Succeeded())
 	{
-		VisualMesh->SetStaticMesh(CubeVisualAsset.Object);
-		VisualMesh->SetRelativeLocation(FVector::Zero());
+		OurVisualMesh->SetStaticMesh(CubeVisualAsset.Object);
+		OurVisualMesh->SetRelativeLocation(FVector::Zero());
+	}
+
+	// Set the object to be replicable
+	bReplicates = true;
+	SetReplicates(true);
+}
+
+void AFloatingActor::SetDomainEnter(const bool bToggle)
+{
+	if(bToggle != bIsEntered)
+	{
+		bIsEntered = bToggle;
+		OnEnterDomainChanged(false);
 	}
 }
 
@@ -29,8 +44,32 @@ void AFloatingActor::BeginPlay()
 	
 }
 
+void AFloatingActor::OnEnterDomainChanged(const bool bSkipAnimation)
+{
+	if(bIsEntered)
+	{
+		OnDomainEnter(bSkipAnimation);
+	}else
+	{
+		OnDomainExit(bSkipAnimation);
+	}
+}
+
+void AFloatingActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Set bIsEntered replication lifetime
+	DOREPLIFETIME(AFloatingActor, bIsEntered);
+}
+
+void AFloatingActor::OnRep_bIsEntered()
+{
+	OnEnterDomainChanged(false);
+}
+
 // Called every frame
-void AFloatingActor::Tick(float DeltaTime)
+void AFloatingActor::Tick(const float DeltaTime)
 {
 	// Call Super::Tick
 	Super::Tick(DeltaTime);
@@ -40,13 +79,13 @@ void AFloatingActor::Tick(float DeltaTime)
 	FRotator NewRotation = GetActorRotation();
 
 	// Get game running time
-	float RunningTime = GetGameTimeSinceCreation();
+	const float RunningTime = GetGameTimeSinceCreation();
 
 	// Calculate delta height
-	float deltaHeight = FMath::Sin(RunningTime + DeltaTime) - FMath::Sin(RunningTime);
+	const float DeltaHeight = FMath::Sin(RunningTime + DeltaTime) - FMath::Sin(RunningTime);
 
 	// Apply delta height and rotation to transform from previous frame
-	NewLocation.Z += deltaHeight * FloatScalar;
+	NewLocation.Z += DeltaHeight * FloatScalar;
 	NewRotation.Yaw += DeltaTime * RotationSpeed;
 
 	SetActorLocationAndRotation(NewLocation,NewRotation);
