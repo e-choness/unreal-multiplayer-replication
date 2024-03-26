@@ -81,6 +81,9 @@ void AprototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
+		// Firing
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AprototypeCharacter::Fire);
+		
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AprototypeCharacter::Move);
 
@@ -127,4 +130,11 @@ void AprototypeCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AprototypeCharacter::Fire()
+{
+	FString FiringMessage = FString::Printf(TEXT("%s is firing projectile!"), *GetFName().ToString());
+	if(GEngine!= nullptr)
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black, FiringMessage);
 }
