@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "prototypeCharacter.h"
+#include "PrototypeCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,13 +10,15 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Net/UnrealNetwork.h"
+#include "Tutorial/ThirdPersonProjectile.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
-// AprototypeCharacter
+// APrototypeCharacter
 
-AprototypeCharacter::AprototypeCharacter()
+APrototypeCharacter::APrototypeCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -50,11 +52,29 @@ AprototypeCharacter::AprototypeCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	// Initialize health values
+	MaxHealth = 100.0f;
+	CurrentHealth = MaxHealth;
+
+	// Initialize projectile class
+	ProjectileClass = AThirdPersonProjectile::StaticClass();
+
+	// Initialize fire rate
+	FireRate = 0.25f;
+	bIsFiringWeapon = false;
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
-void AprototypeCharacter::BeginPlay()
+void APrototypeCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APrototypeCharacter, CurrentHealth);
+}
+
+void APrototypeCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
@@ -69,10 +89,58 @@ void AprototypeCharacter::BeginPlay()
 	}
 }
 
+void APrototypeCharacter::SetCurrentHealth(float HealthValue)
+{
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		CurrentHealth = FMath::Clamp(HealthValue, 0.0f, MaxHealth);
+		OnHealthUpdate();
+	}
+}
+
+float APrototypeCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	const float DamageApplied = CurrentHealth - DamageAmount;
+	SetCurrentHealth(DamageApplied);
+	return DamageApplied;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
-void AprototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void APrototypeCharacter::OnRep_CurrentHealth()
+{
+	OnHealthUpdate();
+}
+
+void APrototypeCharacter::OnHealthUpdate()
+{
+	// Client side logic
+	if(IsLocallyControlled())
+	{
+		const FString HealthMessage = FString::Printf(TEXT("You now have %f health."), CurrentHealth);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, HealthMessage);
+
+		if(CurrentHealth<=0)
+		{
+			const FString DeathMessage = FString::Printf(TEXT("You have been killed."));
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, DeathMessage);
+		}
+	}
+
+	// Server side logic
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		const FString HealthMessage = FString::Printf(TEXT("%s now has %f health."), *GetFName().ToString(), CurrentHealth);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, HealthMessage);
+	}
+}
+
+
+void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
@@ -82,13 +150,14 @@ void AprototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Firing
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AprototypeCharacter::Fire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &APrototypeCharacter::StartFire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &APrototypeCharacter::StopFire);
 		
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AprototypeCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APrototypeCharacter::Move);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AprototypeCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APrototypeCharacter::Look);
 	}
 	else
 	{
@@ -96,7 +165,7 @@ void AprototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
-void AprototypeCharacter::Move(const FInputActionValue& Value)
+void APrototypeCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
@@ -119,7 +188,7 @@ void AprototypeCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void AprototypeCharacter::Look(const FInputActionValue& Value)
+void APrototypeCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -132,9 +201,42 @@ void AprototypeCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AprototypeCharacter::Fire()
+void APrototypeCharacter::StartFire()
 {
-	FString FiringMessage = FString::Printf(TEXT("%s is firing projectile!"), *GetFName().ToString());
-	if(GEngine!= nullptr)
+	if(!bIsFiringWeapon)
+	{
+		FString FiringMessage = FString::Printf(TEXT("%s is firing projectile!"), *GetNameSafe(this));
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black, FiringMessage);
+		
+		// Set is firing weapon is true
+		bIsFiringWeapon = true;
+
+		// Set timer based on the fire rate
+		UWorld* World = GetWorld();
+		World->GetTimerManager().SetTimer(FiringTimer,
+			this,
+			&APrototypeCharacter::StartFire,
+			FireRate,
+			false);
+		HandleFire();
+	}
+		
+}
+
+void APrototypeCharacter::StopFire()
+{
+	bIsFiringWeapon = false;
+}
+
+void APrototypeCharacter::HandleFire_Implementation()
+{
+	const FVector SpawnLocation = GetActorLocation() + GetActorRotation().Vector() * 100.0f + GetActorUpVector() * 50.0f;
+	const FRotator SpawnRotation = GetActorRotation();
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Instigator = GetInstigator();
+	SpawnParameters.Owner = this;
+
+	AThirdPersonProjectile* SpawnProjectile =
+		GetWorld()->SpawnActor<AThirdPersonProjectile>(SpawnLocation, SpawnRotation, SpawnParameters);
 }
