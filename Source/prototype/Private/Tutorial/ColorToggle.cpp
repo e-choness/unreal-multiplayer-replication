@@ -2,9 +2,8 @@
 
 
 #include "Tutorial/ColorToggle.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 #include "Components/SphereComponent.h"
-#include "Util/ColorConstants.h"
 
 // Sets default values
 AColorToggle::AColorToggle()
@@ -22,7 +21,29 @@ AColorToggle::AColorToggle()
 	RootComponent = SphereComponent;
 	
 	// Definition for the static mesh component for changing color
-	ConstructorHelpers::FObjectFinder<UStaticMeshComponent> DefaultMesh(TEXT(""));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> DefaultMesh(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
+	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
+	StaticMesh->SetupAttachment(RootComponent);
+	
+	if(DefaultMesh.Succeeded())
+	{
+		StaticMesh->SetStaticMesh(DefaultMesh.Object);
+		StaticMesh->SetRelativeLocation(FVector::Zero());
+	}
+	// ConstructorHelpers::FObjectFinder<UStaticMesh> DefaultMesh(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
+	//
+	// if(DefaultMesh.Succeeded())
+	// {
+	// 	StaticMeshComponent->SetStaticMesh(DefaultMesh.Object);
+	// 	StaticMeshComponent->SetRelativeLocation(FVector::Zero());
+	// }
+}
+
+void AColorToggle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AColorToggle, CurrentColor);
 }
 
 // Called when the game starts or when spawned
@@ -34,9 +55,18 @@ void AColorToggle::BeginPlay()
 
 void AColorToggle::OnEnterCollider()
 {
-	CurrentColor.R = FMath::FRandRange(0.0f, 1.0f);
-	CurrentColor.G = FMath::FRandRange(0.0f, 1.0f);
-	CurrentColor.B  = FMath::FRandRange(0.0f, 1.0f);
+	OnRep_CurrentColor();
+	
+}
+
+void AColorToggle::OnRep_CurrentColor()
+{
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		CurrentColor.R = FMath::FRandRange(0.0f, 1.0f);
+		CurrentColor.G = FMath::FRandRange(0.0f, 1.0f);
+		CurrentColor.B = FMath::FRandRange(0.0f, 1.0f);
+	}
 }
 
 // Called every frame
