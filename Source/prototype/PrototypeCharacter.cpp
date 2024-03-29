@@ -225,18 +225,23 @@ void APrototypeCharacter::StartFire()
 
 void APrototypeCharacter::StopFire()
 {
-	bIsFiringWeapon = false;
+		bIsFiringWeapon = false;
 }
 
 void APrototypeCharacter::HandleFire_Implementation()
 {
-	const FVector SpawnLocation = GetActorLocation() + GetActorRotation().Vector() * 100.0f + GetActorUpVector() * 50.0f;
-	const FRotator SpawnRotation = GetActorRotation();
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		const FVector SpawnLocation = GetActorLocation() + GetActorRotation().Vector() * 100.0f + GetActorUpVector() * 50.0f;
+		const FRotator SpawnRotation = GetActorRotation();
 
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Instigator = GetInstigator();
-	SpawnParameters.Owner = this;
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.Instigator = GetInstigator();
+		SpawnParameters.Owner = this;
 
-	AThirdPersonProjectile* SpawnProjectile =
-		GetWorld()->SpawnActor<AThirdPersonProjectile>(SpawnLocation, SpawnRotation, SpawnParameters);
+		AThirdPersonProjectile* SpawnProjectile =
+			GetWorld()->SpawnActor<AThirdPersonProjectile>(SpawnLocation, SpawnRotation, SpawnParameters);
+	}
+	
 }
+ 
