@@ -18,7 +18,7 @@ public:
 	// Get lifetime replicated properties
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	// Sphere component used to detect collision
+	// Sphere component as root component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	class USphereComponent* SphereComponent;
 
