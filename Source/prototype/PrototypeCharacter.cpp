@@ -119,7 +119,7 @@ void APrototypeCharacter::OnRep_CurrentHealth()
 void APrototypeCharacter::OnHealthUpdate()
 {
 	// Client side logic
-	if(IsLocallyControlled())
+	if(IsLocallyControlled() && GetLocalRole() == ROLE_SimulatedProxy)
 	{
 		const FString HealthMessage = FString::Printf(TEXT("You now have %f health."), CurrentHealth);
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, HealthMessage);
@@ -134,8 +134,13 @@ void APrototypeCharacter::OnHealthUpdate()
 	// Server side logic
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		const FString HealthMessage = FString::Printf(TEXT("%s now has %f health."), *GetFName().ToString(), CurrentHealth);
+		const FString HealthMessage = FString::Printf(TEXT("%s now has %f health."), *GetNameSafe(this), CurrentHealth);
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, HealthMessage);
+		if(CurrentHealth<=0)
+		{
+			const FString DeathMessage = FString::Printf(TEXT("%s have been killed."), *GetNameSafe(this));
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, DeathMessage);
+		}
 	}
 }
 
