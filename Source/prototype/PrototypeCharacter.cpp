@@ -151,6 +151,9 @@ void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 		// Firing
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &APrototypeCharacter::StartFire);
+		// EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &APrototypeCharacter::StartFire);
+		// EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Ongoing, this, &APrototypeCharacter::StartFire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &APrototypeCharacter::StopFire);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &APrototypeCharacter::StopFire);
 		
 		// Moving
@@ -205,9 +208,6 @@ void APrototypeCharacter::StartFire()
 {
 	if(!bIsFiringWeapon)
 	{
-		FString FiringMessage = FString::Printf(TEXT("%s is firing projectile!"), *GetNameSafe(this));
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black, FiringMessage);
-		
 		// Set is firing weapon is true
 		bIsFiringWeapon = true;
 
@@ -225,13 +225,26 @@ void APrototypeCharacter::StartFire()
 
 void APrototypeCharacter::StopFire()
 {
-		bIsFiringWeapon = false;
+		// Get time to check if firing weapon is stopped
+		UWorld* World = GetWorld();
+		const float RemainingTime = World->GetTimerManager().GetTimerRemaining(FiringTimer);
+	
+		if(RemainingTime <= 0.0f)
+		{
+			FString StopMessage = FString::Printf(TEXT("%s stops firing projectile!"), *GetNameSafe(this));
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black, StopMessage);
+
+			bIsFiringWeapon = false;
+		}
 }
 
 void APrototypeCharacter::HandleFire_Implementation()
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
+		FString FiringMessage = FString::Printf(TEXT("%s is firing projectile!"), *GetNameSafe(this));
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black, FiringMessage);
+		
 		const FVector SpawnLocation = GetActorLocation() + GetActorRotation().Vector() * 100.0f + GetActorUpVector() * 50.0f;
 		const FRotator SpawnRotation = GetActorRotation();
 
@@ -239,7 +252,7 @@ void APrototypeCharacter::HandleFire_Implementation()
 		SpawnParameters.Instigator = GetInstigator();
 		SpawnParameters.Owner = this;
 
-		AThirdPersonProjectile* SpawnProjectile =
+		const AThirdPersonProjectile* SpawnProjectile =
 			GetWorld()->SpawnActor<AThirdPersonProjectile>(SpawnLocation, SpawnRotation, SpawnParameters);
 	}
 	
