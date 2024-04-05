@@ -8,7 +8,7 @@ void AMultiplayerGameMode::PostLogin(APlayerController* NewPlayer)
 	Super::PostLogin(NewPlayer);
 	PlayerControllers.AddUnique(NewPlayer);
 
-	if(GEngine)
+	if(GetLocalRole() == ROLE_Authority)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Post login happens!"));	
 	if(PlayerControllers.Num() >= MinimumPlayerCount)
 	{
@@ -24,7 +24,7 @@ void AMultiplayerGameMode::PostLogin(APlayerController* NewPlayer)
 void AMultiplayerGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	if(GEngine)
+	if(GetLocalRole() == ROLE_Authority)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Play begins!"));	
 	GetWorld()->GetTimerManager().SetTimer(
 				WaitingTimer,
