@@ -39,6 +39,10 @@ class APrototypeCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
+	/** Interact Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
+
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
@@ -70,11 +74,11 @@ protected:
 
 	/** RepNotify for changes made to current health **/
 	UFUNCTION()
-	void OnRep_CurrentHealth();
+	void OnRep_CurrentHealth() const;
 
 	/** Response to health being updated. Called on the server immediately **/
 	UFUNCTION()
-	void OnHealthUpdate();
+	void OnHealthUpdate() const;
 
 protected:
 	// APawn interface
@@ -127,7 +131,15 @@ protected:
 	/** Server function for spawning projectiles**/
 	UFUNCTION(Server, Reliable)
 	void HandleFire();
-
+	
 	/** A timer handle used for providing the fire rate delay in-between spawns.**/
 	FTimerHandle FiringTimer;
+
+protected:
+
+	UFUNCTION(BlueprintCallable, Category="Gameplay")
+	void Interact();
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Gamplay")
+	void OnInteract();
 };
