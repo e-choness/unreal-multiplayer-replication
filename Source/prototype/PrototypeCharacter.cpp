@@ -87,6 +87,8 @@ void APrototypeCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	
 }
 
 void APrototypeCharacter::SetCurrentHealth(float HealthValue)
@@ -111,15 +113,15 @@ float APrototypeCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 //////////////////////////////////////////////////////////////////////////
 // Input
 
-void APrototypeCharacter::OnRep_CurrentHealth()
+void APrototypeCharacter::OnRep_CurrentHealth() const
 {
 	OnHealthUpdate();
 }
 
-void APrototypeCharacter::OnHealthUpdate()
+void APrototypeCharacter::OnHealthUpdate() const
 {
 	// Client side logic
-	if(IsLocallyControlled() && GetLocalRole() == ROLE_SimulatedProxy)
+	if(IsLocallyControlled())
 	{
 		const FString HealthMessage = FString::Printf(TEXT("You now have %f health."), CurrentHealth);
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, HealthMessage);
@@ -166,6 +168,9 @@ void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APrototypeCharacter::Look);
+
+		// Interacting
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APrototypeCharacter::Interact);
 	}
 	else
 	{
@@ -176,7 +181,7 @@ void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 void APrototypeCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
@@ -199,7 +204,7 @@ void APrototypeCharacter::Move(const FInputActionValue& Value)
 void APrototypeCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
+	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
@@ -236,18 +241,36 @@ void APrototypeCharacter::StopFire()
 	
 		if(RemainingTime <= 0.0f)
 		{
-			FString StopMessage = FString::Printf(TEXT("%s stops firing projectile!"), *GetNameSafe(this));
+			const FString StopMessage = FString::Printf(TEXT("%s stops firing projectile!"), *GetNameSafe(this));
 			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black, StopMessage);
 
 			bIsFiringWeapon = false;
 		}
 }
 
+void APrototypeCharacter::Interact()
+{
+	// Client side actions
+	if(IsLocallyControlled())
+	{
+		const FString InteractMessage = FString::Printf(TEXT("you are interacting with something."));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, InteractMessage);
+		OnInteract();
+	}
+	
+	// Server side message
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		const FString InteractMessage = FString::Printf(TEXT("%s is interacting with something."), *GetNameSafe(this));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, InteractMessage);
+	}
+}
+
 void APrototypeCharacter::HandleFire_Implementation()
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		FString FiringMessage = FString::Printf(TEXT("%s is firing projectile!"), *GetNameSafe(this));
+		const FString FiringMessage = FString::Printf(TEXT("%s is firing projectile!"), *GetNameSafe(this));
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black, FiringMessage);
 		
 		const FVector SpawnLocation = GetActorLocation() + GetActorRotation().Vector() * 100.0f + GetActorUpVector() * 50.0f;
