@@ -97,4 +97,9 @@ Plugins/**/Intermediate/*
 ### Rider ###
 .idea/
 
+### Marketplace Package ###
+[Cc]ontent/VehicleVarietyPack
+[Cc]ontent/KayKit
+[Cc]ontent/MS_Vegetables
+
 # End of https://www.toptal.com/developers/gitignore/api/unrealengine
