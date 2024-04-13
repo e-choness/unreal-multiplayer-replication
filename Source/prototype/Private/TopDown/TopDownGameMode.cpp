@@ -2,10 +2,8 @@
 
 
 #include "TopDown/TopDownGameMode.h"
-#include "Kismet/GameplayStatics.h"
-AActor* ATopDownGameMode::ChoosePlayerStart(AController* Player)
-{
-	
 
-	return Player;
-}
+// AActor* ATopDownGameMode::ChoosePlayerStart(AController* Player)
+// {
+// 	return Player;
+// }
