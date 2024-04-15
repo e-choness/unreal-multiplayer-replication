@@ -36,9 +36,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInputAction> InteractActin;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character", meta=(AllowPrivateAccess="true"))
+	class UDataTable* CharacterDataTable;
+
+	struct FSDCharacterStats* CharacterStats;
+
+	UPROPERTY(ReplicatedUsing="OnRep_Score")
+	int32 Score;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// Move
 	void Move(const struct FInputActionValue& Value);
@@ -62,14 +72,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement")
-	float MaxWalkSpeed = 500.0f;
+	void UpdateCharacterStats(int32 CharacterLevel);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement")
-	float MaxSprintSpeed = 3000.0f;
+	UFUNCTION()
+	void OnRep_Score();
+
+protected:
 
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+public:
+	FORCEINLINE FSDCharacterStats* GetCharacterStats() const { return CharacterStats; }
 };
