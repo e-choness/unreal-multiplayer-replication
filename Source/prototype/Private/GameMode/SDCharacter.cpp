@@ -8,6 +8,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameMode/SDCharacterStats.h"
+#include "Engine/DataTable.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASDCharacter::ASDCharacter()
@@ -42,7 +45,6 @@ ASDCharacter::ASDCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
-	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
 
@@ -56,6 +58,7 @@ void ASDCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Add input mapping context
 	if(APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if(UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -63,6 +66,22 @@ void ASDCharacter::BeginPlay()
 			SubSystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	// Start the character with level 1 stats
+	UpdateCharacterStats(1);
+
+	// Update character walk speed
+	if(GetCharacterStats())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
+	}
+	
+}
+
+void ASDCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASDCharacter, Score)
 }
 
 void ASDCharacter::Move(const FInputActionValue& Value)
@@ -92,12 +111,18 @@ void ASDCharacter::Look(const FInputActionValue& Value)
 
 void ASDCharacter::SprintStart(const FInputActionValue& Value)
 {
-	GetCharacterMovement()->MaxWalkSpeed = MaxSprintSpeed;
+	if(GetCharacterStats())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->SprintSpeed;
+	}
 }
 
 void ASDCharacter::SprintEnd(const FInputActionValue& Value)
 {
-	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
+	if(GetCharacterStats())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
+	}
 }
 
 void ASDCharacter::Interact(const FInputActionValue& Value)
@@ -105,7 +130,28 @@ void ASDCharacter::Interact(const FInputActionValue& Value)
 	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Purple, TEXT("Interact"));
 }
 
+void ASDCharacter::UpdateCharacterStats(int32 CharacterLevel)
+{
+	if(CharacterDataTable)
+	{
+		TArray<FSDCharacterStats*> CharacterStatesRows;
+		CharacterDataTable->GetAllRows<FSDCharacterStats>(TEXT("SDCharacter"), CharacterStatesRows);
+		if(CharacterStatesRows.Num() > 0)
+		{
+			const auto NewCharacterLevel = FMath::Clamp(CharacterLevel, 1, CharacterStatesRows.Num());
+			CharacterStats = CharacterStatesRows[NewCharacterLevel - 1];
+
+			GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
+		}
+	}
+}
+
+void ASDCharacter::OnRep_Score()
+{
+}
+
 // Called every frame
+
 void ASDCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -113,6 +159,7 @@ void ASDCharacter::Tick(float DeltaTime)
 }
 
 // Called to bind functionality to input
+
 void ASDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -133,4 +180,3 @@ void ASDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(InteractActin, ETriggerEvent::Started, this, &ASDCharacter::Interact);
 	}
 }
-
