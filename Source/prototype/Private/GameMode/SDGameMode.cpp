@@ -13,7 +13,7 @@ ASDGameMode::ASDGameMode()
 	PlayerControllerClass = ASDPlayerController::StaticClass();
 	PlayerStateClass = ASDPlayerState::StaticClass();
 
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ShadowDungeon/Pawns/BP_Character"));
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ShadowDungeon/Actors/BP_Character"));
 
 	if(PlayerPawnBPClass.Class != nullptr)
 	{
