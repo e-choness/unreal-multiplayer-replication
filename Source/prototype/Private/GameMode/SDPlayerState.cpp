@@ -23,7 +23,7 @@ void ASDPlayerState::AddXp(const int32 Value)
 	Xp += Value;
 	OnXpChanged.Broadcast(Xp);
 
-	GEngine->AddOnScreenDebugMessage(0, 5.0f, FColor::Yellow, FString::Printf(TEXT("Total Xp: %d"), Value));
+	GEngine->AddOnScreenDebugMessage(0, 5.0f, FColor::Yellow, FString::Printf(TEXT("Total Xp: %d"), Xp));
 
 	if(const auto Character = Cast<ASDCharacter>(GetPawn()))
 	{
