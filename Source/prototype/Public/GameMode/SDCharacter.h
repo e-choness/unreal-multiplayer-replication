@@ -41,9 +41,6 @@ public:
 
 	struct FSDCharacterStats* CharacterStats;
 
-	UPROPERTY(ReplicatedUsing="OnRep_Score")
-	int32 Score;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -56,11 +53,18 @@ protected:
 	// Look
 	void Look(const FInputActionValue& Value);
 
+	
 	// Sprint Start
 	void SprintStart(const FInputActionValue& Value);
+	
+	UFUNCTION(Server, Reliable)
+	void SprintStart_Server();
 
 	// Sprint End
 	void SprintEnd(const FInputActionValue& Value);
+	
+	UFUNCTION(Server, Reliable)
+	void SprintEnd_Server();
 
 	// Interact
 	void Interact(const FInputActionValue& Value);
@@ -74,8 +78,6 @@ public:
 
 	void UpdateCharacterStats(int32 CharacterLevel);
 
-	UFUNCTION()
-	void OnRep_Score();
 
 protected:
 

@@ -81,7 +81,6 @@ void ASDCharacter::BeginPlay()
 void ASDCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ASDCharacter, Score)
 }
 
 void ASDCharacter::Move(const FInputActionValue& Value)
@@ -111,13 +110,39 @@ void ASDCharacter::Look(const FInputActionValue& Value)
 
 void ASDCharacter::SprintStart(const FInputActionValue& Value)
 {
+	// Client side logic
 	if(GetCharacterStats())
 	{
 		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->SprintSpeed;
+		// GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Purple, FString::Printf(TEXT("Sprinting with speed %f"), GetCharacterMovement()->MaxWalkSpeed));
 	}
+
+	// Server side logic, the same logic on client side, but server logic will not run on local client
+	SprintStart_Server();
 }
 
 void ASDCharacter::SprintEnd(const FInputActionValue& Value)
+{
+	// Client side logic
+	if(GetCharacterStats())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
+	}
+	
+	// Server side logic, the same logic on client side, but server logic will not run on local client
+	SprintEnd_Server();
+}
+
+void ASDCharacter::SprintStart_Server_Implementation()
+{
+	if(GetCharacterStats())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->SprintSpeed;
+		// GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Purple, FString::Printf(TEXT("Sprinting with speed %f"), GetCharacterMovement()->MaxWalkSpeed));
+	}
+}
+
+void ASDCharacter::SprintEnd_Server_Implementation()
 {
 	if(GetCharacterStats())
 	{
@@ -132,6 +157,12 @@ void ASDCharacter::Interact(const FInputActionValue& Value)
 
 void ASDCharacter::UpdateCharacterStats(int32 CharacterLevel)
 {
+	auto IsSprinting = false;
+	if(GetCharacterStats())
+	{
+		IsSprinting = GetCharacterMovement()->MaxWalkSpeed == GetCharacterStats()->SprintSpeed;
+	}
+	
 	if(CharacterDataTable)
 	{
 		TArray<FSDCharacterStats*> CharacterStatesRows;
@@ -142,12 +173,12 @@ void ASDCharacter::UpdateCharacterStats(int32 CharacterLevel)
 			CharacterStats = CharacterStatesRows[NewCharacterLevel - 1];
 
 			GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
+			if(IsSprinting)
+			{
+				SprintStart_Server();
+			}
 		}
 	}
-}
-
-void ASDCharacter::OnRep_Score()
-{
 }
 
 // Called every frame
