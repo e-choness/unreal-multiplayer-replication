@@ -21,34 +21,34 @@ class APrototypeCharacter : public ACharacter
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* CameraBoom;
+	TObjectPtr<USpringArmComponent> CameraBoom;
 
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FollowCamera;
+	TObjectPtr<UCameraComponent> FollowCamera;
 	
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputMappingContext* DefaultMappingContext;
+	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* JumpAction;
+	TObjectPtr<UInputAction> JumpAction;
 
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* MoveAction;
+	TObjectPtr<UInputAction> MoveAction;
 
 	/** Interact Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* InteractAction;
+	TObjectPtr<UInputAction> InteractAction;
 
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* LookAction;
+	TObjectPtr<UInputAction> LookAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* FireAction;
+	TObjectPtr<UInputAction> FireAction;
 
 public:
 	APrototypeCharacter();
@@ -62,7 +62,6 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-	
 
 	/** The player's maximum health. This is the highest value of their health. **/
 	UPROPERTY(EditDefaultsOnly, Category="Health")
@@ -85,13 +84,13 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	// To add mapping context
-	virtual void BeginPlay();
+	virtual void BeginPlay() override;
 
 public:
 	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	/** Getter for Max Health **/
 	UFUNCTION(BlueprintPure, Category="Health")
@@ -107,7 +106,7 @@ public:
 
 	/** Event for taking damage. Overridden from APawn **/
 	UFUNCTION(BlueprintCallable, Category="Health")
-	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 
@@ -130,7 +129,7 @@ protected:
 
 	/** Server function for spawning projectiles**/
 	UFUNCTION(Server, Reliable)
-	void HandleFire();
+	void HandleFire_Server();
 	
 	/** A timer handle used for providing the fire rate delay in-between spawns.**/
 	FTimerHandle FiringTimer;

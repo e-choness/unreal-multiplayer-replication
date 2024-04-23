@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "GameMode/SDCharacter.h"
 #include "SDInteractable.generated.h"
 
 class ASDCharacter;
@@ -16,9 +17,9 @@ class PROTOTYPE_API ISDInteractable
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interaction", meta=(DisplayName="Interact"))
-	void Interact(ASDCharacter* CharacterInstigator);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interaction", meta=(DisplayName="Use"))
+	void Use(ASDCharacter* CharacterInstigator);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactin", meta=(DisplayName="Can Interact"))
-	bool CanInteract(ASDCharacter* CharacterInstigator) const;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interaction", meta=(DisplayName="CanUse"))
+	bool CanUse(ASDCharacter* CharacterInstigator) const;
 };

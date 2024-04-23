@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "CustomPawn.generated.h"
 
+class USceneComponent;
+
 UCLASS()
 class PROTOTYPE_API ACustomPawn : public APawn
 {
@@ -17,7 +19,7 @@ public:
 
 	// Reference to visible scene component
 	UPROPERTY(EditAnywhere)
-	USceneComponent* VisibleComponent;
+	TObjectPtr<USceneComponent> VisibleComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="CustomPawn|CameraSettings")
 	FVector CameraPosition = FVector(-250.0f, 0.0f, 250.0f);

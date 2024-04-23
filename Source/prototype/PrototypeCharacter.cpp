@@ -60,9 +60,10 @@ APrototypeCharacter::APrototypeCharacter()
 	ProjectileClass = AThirdPersonProjectile::StaticClass();
 
 	// Initialize fire rate
-	FireRate = 0.25f;
+	FireRate = 0.5f;
 	bIsFiringWeapon = false;
-	
+
+	bReplicates = true;
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -87,8 +88,6 @@ void APrototypeCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-
-	
 }
 
 void APrototypeCharacter::SetCurrentHealth(float HealthValue)
@@ -157,11 +156,7 @@ void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Firing
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &APrototypeCharacter::StartFire);
-		// EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &APrototypeCharacter::StartFire);
-		// EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Ongoing, this, &APrototypeCharacter::StartFire);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Canceled, this, &APrototypeCharacter::StopFire);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &APrototypeCharacter::StopFire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Ongoing, this, &APrototypeCharacter::StartFire);
 		
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APrototypeCharacter::Move);
@@ -216,21 +211,19 @@ void APrototypeCharacter::Look(const FInputActionValue& Value)
 
 void APrototypeCharacter::StartFire()
 {
-	if(!bIsFiringWeapon)
-	{
-		// Set is firing weapon is true
-		bIsFiringWeapon = true;
+	if(bIsFiringWeapon) return;
 
-		// Set timer based on the fire rate
-		UWorld* World = GetWorld();
-		World->GetTimerManager().SetTimer(FiringTimer,
-			this,
-			&APrototypeCharacter::StartFire,
-			FireRate,
-			false);
-		HandleFire();
-	}
-		
+	// Set is firing weapon is true
+	bIsFiringWeapon = true;
+
+	// Set timer based on the fire rate
+	UWorld* World = GetWorld();
+	World->GetTimerManager().SetTimer(FiringTimer,
+		this,
+		&APrototypeCharacter::StopFire,
+		FireRate,
+		false);
+	HandleFire_Server();
 }
 
 void APrototypeCharacter::StopFire()
@@ -266,23 +259,19 @@ void APrototypeCharacter::Interact()
 	}
 }
 
-void APrototypeCharacter::HandleFire_Implementation()
+void APrototypeCharacter::HandleFire_Server_Implementation()
 {
-	if(GetLocalRole() == ROLE_Authority)
-	{
-		const FString FiringMessage = FString::Printf(TEXT("%s is firing projectile!"), *GetNameSafe(this));
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black, FiringMessage);
-		
-		const FVector SpawnLocation = GetActorLocation() + GetActorRotation().Vector() * 100.0f + GetActorUpVector() * 50.0f;
-		const FRotator SpawnRotation = GetActorRotation();
-
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.Instigator = GetInstigator();
-		SpawnParameters.Owner = this;
-
-		const AThirdPersonProjectile* SpawnProjectile =
-			GetWorld()->SpawnActor<AThirdPersonProjectile>(SpawnLocation, SpawnRotation, SpawnParameters);
-	}
+	const FString FiringMessage = FString::Printf(TEXT("%s is firing projectile!"), *GetNameSafe(this));
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black, FiringMessage);
 	
+	const FVector SpawnLocation = GetActorLocation() + GetActorRotation().Vector() * 100.0f + GetActorUpVector() * 50.0f;
+	const FRotator SpawnRotation = GetActorRotation();
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Instigator = GetInstigator();
+	SpawnParameters.Owner = this;
+
+	const AThirdPersonProjectile* SpawnProjectile =
+		GetWorld()->SpawnActor<AThirdPersonProjectile>(SpawnLocation, SpawnRotation, SpawnParameters);
 }
  

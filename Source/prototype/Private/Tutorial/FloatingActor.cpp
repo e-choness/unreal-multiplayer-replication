@@ -25,7 +25,6 @@ AFloatingActor::AFloatingActor()
 
 	// Set the object to be replicable
 	bReplicates = true;
-	SetReplicates(true);
 }
 
 void AFloatingActor::SetDomainEnter(const bool bToggle)

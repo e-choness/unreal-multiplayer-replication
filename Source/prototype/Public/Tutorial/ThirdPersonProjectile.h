@@ -6,6 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "ThirdPersonProjectile.generated.h"
 
+class USphereComponent;
+class UStaticMeshComponent;
+class UProjectileMovementComponent;
+class UParticleSystem;
+class UDamageType;
+
 UCLASS()
 class PROTOTYPE_API AThirdPersonProjectile : public AActor
 {
@@ -17,22 +23,22 @@ public:
 
 	// Sphere component used to test collision
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	class USphereComponent* SphereComponent;
+	TObjectPtr<USphereComponent> SphereComponent;
 
 	// Static Mesh used to provide a visual representation of the object
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	class UStaticMeshComponent* StaticMesh;
+	TObjectPtr<UStaticMeshComponent> StaticMesh;
 
 	// Movement Component for handling projectile movement.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	class UProjectileMovementComponent* ProjectileMovementComponent;
+	TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent;
 
 	// Particle used when the projectile impacts against another object and explodes.
 	UPROPERTY(EditAnywhere, Category="Effects")
-	class UParticleSystem* ExplosionEffect;
+	TObjectPtr<UParticleSystem> ExplosionEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Damage")
-	TSubclassOf<class UDamageType> DamageType;
+	TSubclassOf<UDamageType> DamageType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Damage")
 	float Damage;

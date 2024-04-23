@@ -41,6 +41,9 @@ public:
 
 	struct FSDCharacterStats* CharacterStats;
 
+	UPROPERTY()
+	AActor* InteractableActor;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -68,6 +71,11 @@ protected:
 
 	// Interact
 	void Interact(const FInputActionValue& Value);
+
+	UFUNCTION(Server, Reliable)
+	void Interact_Server();
+
+	void DetectInteractable();
 
 public:	
 	// Called every frame

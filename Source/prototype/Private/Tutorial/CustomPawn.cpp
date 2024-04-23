@@ -35,7 +35,6 @@ ACustomPawn::ACustomPawn()
 void ACustomPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void ACustomPawn::Move_XAxies(float AxisValue)

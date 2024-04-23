@@ -9,22 +9,26 @@
 /**
  * 
  */
+
+class USpringArmComponent;
+class UCameraComponent;
+
 UCLASS()
 class PROTOTYPE_API AMyVehiclePawn : public AWheeledVehiclePawn
 {
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraFrontBoom;
+	TObjectPtr<USpringArmComponent> CameraFrontBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
-	class UCameraComponent* CameraFront;
+	TObjectPtr<UCameraComponent> CameraFront;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBackBoom;
+	TObjectPtr<USpringArmComponent> CameraBackBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess = "true"))
-	class UCameraComponent* CameraBack;
+	TObjectPtr<UCameraComponent> CameraBack;
 
 public:
 	AMyVehiclePawn();
@@ -37,10 +41,10 @@ protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 public:
-	FORCEINLINE class USpringArmComponent* GetCameraFrontBoom() const { return CameraFrontBoom; }
-	FORCEINLINE class UCameraComponent* GetCameraFront() const { return CameraFront; }
-	FORCEINLINE class USpringArmComponent* GetCameraBackBoom() const { return CameraBackBoom; }
-	FORCEINLINE class UCameraComponent* GetCameraBack() const { return CameraBack; }
+	FORCEINLINE USpringArmComponent* GetCameraFrontBoom() const { return CameraFrontBoom; }
+	FORCEINLINE UCameraComponent* GetCameraFront() const { return CameraFront; }
+	FORCEINLINE USpringArmComponent* GetCameraBackBoom() const { return CameraBackBoom; }
+	FORCEINLINE UCameraComponent* GetCameraBack() const { return CameraBack; }
 	
 	virtual void Tick(float DeltaSeconds) override;
 };
