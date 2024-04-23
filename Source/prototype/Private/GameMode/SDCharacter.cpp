@@ -10,6 +10,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameMode/SDCharacterStats.h"
 #include "Engine/DataTable.h"
+#include "GameMode/SDInteractable.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -69,13 +71,6 @@ void ASDCharacter::BeginPlay()
 
 	// Start the character with level 1 stats
 	UpdateCharacterStats(1);
-
-	// Update character walk speed
-	if(GetCharacterStats())
-	{
-		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
-	}
-	
 }
 
 void ASDCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -155,6 +150,14 @@ void ASDCharacter::Interact(const FInputActionValue& Value)
 	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Purple, TEXT("Interact"));
 }
 
+void ASDCharacter::Interact_Server_Implementation()
+{
+	if(InteractableActor)
+	{
+		ISDInteractable::Execute_Use(InteractableActor, this);
+	}
+}
+
 void ASDCharacter::UpdateCharacterStats(int32 CharacterLevel)
 {
 	auto IsSprinting = false;
@@ -183,10 +186,47 @@ void ASDCharacter::UpdateCharacterStats(int32 CharacterLevel)
 
 // Called every frame
 
+void ASDCharacter::DetectInteractable()
+{
+	if(GetLocalRole() != ROLE_Authority) return;
+	
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.bTraceComplex = true;
+	QueryParams.AddIgnoredActor(this);
+
+	auto SphereRadius = 50.0f;
+	auto StartLocation = GetActorLocation() + GetActorForwardVector() * 150.0f;
+	auto EndLocation = StartLocation + GetActorForwardVector() * 500.0f;
+
+	auto isHit = UKismetSystemLibrary::SphereTraceSingle(
+		GetWorld(),
+		StartLocation,
+		EndLocation,
+		SphereRadius,
+		UEngineTypes::ConvertToTraceType(ECC_WorldStatic),
+		false,
+		TArray<AActor*>(),
+		EDrawDebugTrace::ForOneFrame,
+		HitResult,
+		true
+	);
+
+	if(isHit && HitResult.GetActor()->GetClass()->ImplementsInterface(USDInteractable::StaticClass()))
+	{
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, SphereRadius, 12, FColor::Magenta, 1.0f);
+		InteractableActor = HitResult.GetActor();
+	}else
+	{
+		InteractableActor = nullptr;
+	}
+}
+
 void ASDCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	DetectInteractable();
 }
 
 // Called to bind functionality to input

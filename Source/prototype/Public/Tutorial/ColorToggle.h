@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "ColorToggle.generated.h"
 
+class USphereComponent;
+class UStaticMeshComponent;
+
 UCLASS()
 class PROTOTYPE_API AColorToggle : public AActor
 {
@@ -20,11 +23,11 @@ public:
 
 	// Sphere component as root component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	class USphereComponent* SphereComponent;
+	TObjectPtr<USphereComponent> SphereComponent;
 
 	// Static Mesh as a visual presentation
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components")
-	class UStaticMeshComponent *StaticMesh;
+	TObjectPtr<UStaticMeshComponent> StaticMesh;
 
 protected:
 	// Called when the game starts or when spawned
