@@ -133,7 +133,6 @@ void ASDCharacter::SprintStart_Server_Implementation()
 	if(GetCharacterStats())
 	{
 		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->SprintSpeed;
-		// GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Purple, FString::Printf(TEXT("Sprinting with speed %f"), GetCharacterMovement()->MaxWalkSpeed));
 	}
 }
 
@@ -147,11 +146,13 @@ void ASDCharacter::SprintEnd_Server_Implementation()
 
 void ASDCharacter::Interact(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Purple, TEXT("Interact"));
+	Interact_Server();
 }
 
 void ASDCharacter::Interact_Server_Implementation()
 {
+	DetectInteractable();
+
 	if(InteractableActor)
 	{
 		ISDInteractable::Execute_Use(InteractableActor, this);
@@ -226,7 +227,7 @@ void ASDCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	DetectInteractable();
+	// DetectInteractable();
 }
 
 // Called to bind functionality to input
@@ -248,6 +249,6 @@ void ASDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ASDCharacter::SprintEnd);
 
 		// Bind Interact Action
-		EnhancedInputComponent->BindAction(InteractActin, ETriggerEvent::Started, this, &ASDCharacter::Interact);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ASDCharacter::Interact);
 	}
 }

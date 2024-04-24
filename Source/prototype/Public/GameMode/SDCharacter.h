@@ -34,7 +34,7 @@ public:
 	TObjectPtr<UInputAction> SprintAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
-	TObjectPtr<UInputAction> InteractActin;
+	TObjectPtr<UInputAction> InteractAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character", meta=(AllowPrivateAccess="true"))
 	class UDataTable* CharacterDataTable;
@@ -55,7 +55,6 @@ protected:
 
 	// Look
 	void Look(const FInputActionValue& Value);
-
 	
 	// Sprint Start
 	void SprintStart(const FInputActionValue& Value);
@@ -74,7 +73,7 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Interact_Server();
-
+	
 	void DetectInteractable();
 
 public:	
