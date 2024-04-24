@@ -226,8 +226,6 @@ void ASDCharacter::DetectInteractable()
 void ASDCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// DetectInteractable();
 }
 
 // Called to bind functionality to input
