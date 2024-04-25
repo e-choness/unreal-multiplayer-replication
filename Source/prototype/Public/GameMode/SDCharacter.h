@@ -6,6 +6,13 @@
 #include "GameFramework/Character.h"
 #include "SDCharacter.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
+class UInputMappingContext;
+class UInputAction;
+class UDataTable;
+struct FSDCharacterStats;
+
 UCLASS()
 class PROTOTYPE_API ASDCharacter : public ACharacter
 {
@@ -16,16 +23,16 @@ public:
 	ASDCharacter();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess="true"))
-	TObjectPtr<class USpringArmComponent> CameraBoom;
+	TObjectPtr<USpringArmComponent> CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera, meta=(AllowPrivateAccess="true"))
-	TObjectPtr<class UCameraComponent> FollowCamera;
+	TObjectPtr<UCameraComponent> FollowCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
-	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
+	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
-	TObjectPtr<class UInputAction> MoveAction;
+	TObjectPtr<UInputAction> MoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInputAction> LookAction;
@@ -37,9 +44,9 @@ public:
 	TObjectPtr<UInputAction> InteractAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character", meta=(AllowPrivateAccess="true"))
-	class UDataTable* CharacterDataTable;
+	UDataTable* CharacterDataTable;
 
-	struct FSDCharacterStats* CharacterStats;
+	FSDCharacterStats* CharacterStats;
 
 	UPROPERTY()
 	AActor* InteractableActor;
@@ -84,7 +91,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void UpdateCharacterStats(int32 CharacterLevel);
-
 
 protected:
 
