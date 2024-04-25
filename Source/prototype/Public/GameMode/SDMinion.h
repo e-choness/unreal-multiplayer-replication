@@ -36,6 +36,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Minion AI")
 	void SetNextPatrolLocation();
 
+	UFUNCTION()
+	bool IsChasing() const;
+	
 	UFUNCTION(BlueprintCallable, Category="Minion AI")
 	void Chase(APawn* Pawn);
 
@@ -43,8 +46,11 @@ public:
 	void OnPawnDetected(APawn* Pawn);
 
 	UFUNCTION()
+	void OnHearNoises(APawn* Pawn);
+
+	UFUNCTION()
 	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
-	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
