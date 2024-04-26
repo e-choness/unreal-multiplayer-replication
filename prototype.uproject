@@ -35,6 +35,11 @@
 		{
 			"Name": "ChaosVehiclesPlugin",
 			"Enabled": true
+		},
+		{
+			"Name": "InteractionSystemPlugin",
+			"Enabled": true,
+			"MarketplaceURL": "https://publish.unrealengine.com/v3/edit-product/e842c2ad479c42b29a6f57353fca3498"
 		}
 	]
 }
