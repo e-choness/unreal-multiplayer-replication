@@ -15,5 +15,8 @@ struct PROTOTYPE_API FSDMinionStats
 	float ChaseSpeed = 350.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float PatrolRadius = 50000.0f;
+	float PatrolRadius = 1500.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float PatrolThreshold = 500.0f;
 };

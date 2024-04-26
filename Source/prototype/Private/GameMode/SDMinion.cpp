@@ -61,13 +61,15 @@ void ASDMinion::SetNextPatrolLocation()
 	if(GetLocalRole() != ROLE_Authority) return;
 
 	GetCharacterMovement()->MaxWalkSpeed = MinionStats.PatrolSpeed;
+	// const auto LocationFound = UNavigationSystemV1::K2_GetRandomLocationInNavigableRadius(this, GetActorLocation(), PatrolLocation.Location, MinionStats.PatrolRadius);
 	
-	const auto LocationFound = UNavigationSystemV1::K2_GetRandomPointInNavigableRadius(this, GetActorLocation(), PatrolLocation, MinionStats.PatrolRadius);
-
-	if(LocationFound)
+	if(NavigationSystemV1->GetRandomPointInNavigableRadius(GetActorLocation(),MinionStats.PatrolRadius, PatrolLocation))
+	// if(LocationFound)
 	{
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), PatrolLocation);
 	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, FString::Printf(TEXT("The minion is patrolling to %f %f %f."), PatrolLocation.Location.X, PatrolLocation.Location.Y, PatrolLocation.Location.Z));
 }
 
 bool ASDMinion::IsChasing() const
@@ -116,13 +118,14 @@ void ASDMinion::PostInitializeComponents()
 	OnActorBeginOverlap.AddDynamic(this, &ASDMinion::OnBeginOverlap);
 	GetPawnSense()->OnSeePawn.AddDynamic(this, &ASDMinion::OnPawnDetected);
 	// GetPawnSense()->OnHearNoise.AddDynamic(this, &ASDMinion::OnHearNoises);
+	NavigationSystemV1 = Cast<UNavigationSystemV1>(GetWorld()->GetNavigationSystem());
 }
 
 // Called when the game starts or when spawned
 void ASDMinion::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	SetNextPatrolLocation();
 }
 
 // Called every frame
@@ -134,7 +137,7 @@ void ASDMinion::Tick(float DeltaTime)
 	
 	if(IsChasing()) return;
 
-	if((GetActorLocation() - PatrolLocation).Size() < 500.0f)
+	if((GetActorLocation() - PatrolLocation).Size() < MinionStats.PatrolThreshold)
 	{
 		SetNextPatrolLocation();
 	}

@@ -9,6 +9,8 @@
 
 class UPawnSensingComponent;
 class USphereComponent;
+class UNavigationSystemV1;
+struct FNavLocation;
 
 UCLASS()
 class PROTOTYPE_API ASDMinion : public ACharacter
@@ -22,7 +24,9 @@ class PROTOTYPE_API ASDMinion : public ACharacter
 	TObjectPtr<USphereComponent> Collision;
 
 	UPROPERTY()
-	FVector PatrolLocation;
+	UNavigationSystemV1* NavigationSystemV1;
+
+	FNavLocation PatrolLocation;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FSDMinionStats MinionStats;
