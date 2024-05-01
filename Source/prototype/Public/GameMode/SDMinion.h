@@ -42,6 +42,9 @@ public:
 
 	UFUNCTION()
 	bool IsChasing() const;
+
+	UFUNCTION()
+	bool IsStayingStill() const;
 	
 	UFUNCTION(BlueprintCallable, Category="Minion AI")
 	void Chase(APawn* Pawn);
@@ -58,6 +61,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	FTimerHandle PatrolTimer;
 
 public:	
 	// Called every frame

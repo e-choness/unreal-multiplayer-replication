@@ -77,12 +77,30 @@ bool ASDMinion::IsChasing() const
 	return GetMovementComponent()->GetMaxSpeed() == MinionStats.ChaseSpeed;
 }
 
+bool ASDMinion::IsStayingStill() const
+{
+	return GetCharacterMovement()->MaxWalkSpeed == 0.0f;
+}
+
 void ASDMinion::Chase(APawn* Pawn)
 {
 	if(GetLocalRole()!=ROLE_Authority) return;
 	
 	GetCharacterMovement()->MaxWalkSpeed = MinionStats.ChaseSpeed;
 	UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), Pawn);
+
+	if(IsStayingStill())
+	{
+		GetWorld()->GetTimerManager().SetTimer(PatrolTimer, this, &ASDMinion::SetNextPatrolLocation, 3.0f, false);
+	}
+
+	const auto RemainingTime = GetWorld()->GetTimerManager().GetTimerRemaining(PatrolTimer);
+
+	if(RemainingTime <=0.0f)
+	{
+		SetNextPatrolLocation();
+	}
+
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Black, FString::Printf(TEXT("The minion chases the player at speed %f."), GetCharacterMovement()->MaxWalkSpeed));
 }
 
@@ -136,6 +154,8 @@ void ASDMinion::Tick(float DeltaTime)
 	if(GetLocalRole() != ROLE_Authority) return;
 	
 	if(IsChasing()) return;
+
+	
 
 	if((GetActorLocation() - PatrolLocation).Size() < MinionStats.PatrolThreshold)
 	{
