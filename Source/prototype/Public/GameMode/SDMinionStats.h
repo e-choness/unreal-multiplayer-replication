@@ -19,4 +19,7 @@ struct PROTOTYPE_API FSDMinionStats
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float PatrolThreshold = 500.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float PatrolRestartTime = 3.0f;
 };
