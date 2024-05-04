@@ -25,9 +25,7 @@ class PROTOTYPE_API ASDMinion : public ACharacter
 
 	UPROPERTY()
 	UNavigationSystemV1* NavigationSystemV1;
-
-	FNavLocation PatrolLocation;
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FSDMinionStats MinionStats;
 
@@ -65,8 +63,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY()
 	FTimerHandle PatrolTimer;
+
+	FNavLocation PatrolLocation;
 	
 	bool IsRestartPatrolling;
 public:	
