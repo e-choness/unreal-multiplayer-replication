@@ -53,6 +53,8 @@ ASDMinion::ASDMinion()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
 	
+	IsRestartPatrolling = false;
+	
 	bReplicates = true;
 }
 
@@ -61,10 +63,8 @@ void ASDMinion::SetNextPatrolLocation()
 	if(GetLocalRole() != ROLE_Authority) return;
 
 	GetCharacterMovement()->MaxWalkSpeed = MinionStats.PatrolSpeed;
-	// const auto LocationFound = UNavigationSystemV1::K2_GetRandomLocationInNavigableRadius(this, GetActorLocation(), PatrolLocation.Location, MinionStats.PatrolRadius);
 	
 	if(NavigationSystemV1->GetRandomPointInNavigableRadius(GetActorLocation(),MinionStats.PatrolRadius, PatrolLocation))
-	// if(LocationFound)
 	{
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), PatrolLocation);
 	}
@@ -72,9 +72,27 @@ void ASDMinion::SetNextPatrolLocation()
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, FString::Printf(TEXT("The minion is patrolling to %f %f %f."), PatrolLocation.Location.X, PatrolLocation.Location.Y, PatrolLocation.Location.Z));
 }
 
+void ASDMinion::RestartPatrol()
+{
+	const auto RemainingTime = GetWorld()->GetTimerManager().GetTimerRemaining(PatrolTimer);
+	
+	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Blue, FString::Printf(TEXT("Remaining patrol time: %f"), RemainingTime));
+	if(RemainingTime <= 0.0f)
+	{
+		GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Blue, FString::Printf(TEXT("Restart patrolling.")));
+		SetNextPatrolLocation();
+		IsRestartPatrolling = false;
+	}
+}
+
 bool ASDMinion::IsChasing() const
 {
 	return GetMovementComponent()->GetMaxSpeed() == MinionStats.ChaseSpeed;
+}
+
+bool ASDMinion::IsMoving() const
+{
+	return GetCharacterMovement()->Velocity.Length() > 0.0f;
 }
 
 void ASDMinion::Chase(APawn* Pawn)
@@ -83,15 +101,18 @@ void ASDMinion::Chase(APawn* Pawn)
 	
 	GetCharacterMovement()->MaxWalkSpeed = MinionStats.ChaseSpeed;
 	UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), Pawn);
+	
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Black, FString::Printf(TEXT("The minion chases the player at speed %f."), GetCharacterMovement()->MaxWalkSpeed));
 }
 
 void ASDMinion::OnPawnDetected(APawn* Pawn)
 {
 	if(!Pawn->IsA<ASDCharacter>()) return;
-	GEngine->AddOnScreenDebugMessage(3, 3.0f, FColor::Red, TEXT("The minion sees the player."));
+	GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Red, TEXT("The minion sees the player."));
+	GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Red, FString::Printf(TEXT("The minion moving speed is %f."), GetCharacterMovement()->GetMaxSpeed()));
+	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("The minion velocity is %f %f %f."), GetCharacterMovement()->GetLastUpdateVelocity().X, GetCharacterMovement()->GetLastUpdateVelocity().Y, GetCharacterMovement()->GetLastUpdateVelocity().Z));
 	
-	if(GetMovementComponent()->GetMaxSpeed() != MinionStats.ChaseSpeed)
+	if(!IsChasing())
 	{
 		Chase(Pawn);
 	}
@@ -134,9 +155,18 @@ void ASDMinion::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if(GetLocalRole() != ROLE_Authority) return;
+
+	if(IsRestartPatrolling) return;
+
+	if(!IsMoving())
+	{
+		GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Red, TEXT("The minion stays still."));
+		IsRestartPatrolling = true;
+		GetWorld()->GetTimerManager().SetTimer(PatrolTimer, this, &ASDMinion::RestartPatrol, MinionStats.PatrolRestartTime, false);
+	}
 	
 	if(IsChasing()) return;
-
+	
 	if((GetActorLocation() - PatrolLocation).Size() < MinionStats.PatrolThreshold)
 	{
 		SetNextPatrolLocation();
@@ -147,6 +177,5 @@ void ASDMinion::Tick(float DeltaTime)
 void ASDMinion::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 

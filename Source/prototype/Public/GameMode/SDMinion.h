@@ -40,8 +40,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Minion AI")
 	void SetNextPatrolLocation();
 
+	UFUNCTION(Blueprintable, Category="Minion AI")
+	void RestartPatrol();
+	
 	UFUNCTION()
 	bool IsChasing() const;
+
+	UFUNCTION()
+	bool IsMoving() const;
 	
 	UFUNCTION(BlueprintCallable, Category="Minion AI")
 	void Chase(APawn* Pawn);
@@ -59,6 +65,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY()
+	FTimerHandle PatrolTimer;
+	
+	bool IsRestartPatrolling;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
