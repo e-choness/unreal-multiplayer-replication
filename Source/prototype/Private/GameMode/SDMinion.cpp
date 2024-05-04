@@ -74,7 +74,7 @@ void ASDMinion::SetNextPatrolLocation()
 
 void ASDMinion::RestartPatrol()
 {
-	const auto RemainingTime = GetWorld()->GetTimerManager().GetTimerRemaining(PatrolTimer);
+	const auto RemainingTime = GetWorldTimerManager().GetTimerRemaining(PatrolTimer);
 	
 	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Blue, FString::Printf(TEXT("Remaining patrol time: %f"), RemainingTime));
 	if(RemainingTime <= 0.0f)
@@ -162,7 +162,7 @@ void ASDMinion::Tick(float DeltaTime)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Red, TEXT("The minion stays still."));
 		IsRestartPatrolling = true;
-		GetWorld()->GetTimerManager().SetTimer(PatrolTimer, this, &ASDMinion::RestartPatrol, MinionStats.PatrolRestartTime, false);
+		GetWorldTimerManager().SetTimer(PatrolTimer, this, &ASDMinion::RestartPatrol, MinionStats.PatrolRestartTime, false);
 	}
 	
 	if(IsChasing()) return;
