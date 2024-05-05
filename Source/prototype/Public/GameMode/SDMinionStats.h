@@ -25,4 +25,7 @@ struct PROTOTYPE_API FSDMinionStats
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float AlertRadius = 6000.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Health = 5.0f;
 };
