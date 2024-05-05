@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/CapsuleComponent.h"
+#include "GameMode/SDGameMode.h"
 
 // Sets default values
 ASDMinion::ASDMinion()
@@ -101,6 +102,11 @@ void ASDMinion::Chase(APawn* Pawn)
 	
 	GetCharacterMovement()->MaxWalkSpeed = MinionStats.ChaseSpeed;
 	UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), Pawn);
+
+	if(const auto GameMode = Cast<ASDGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->AlertMinions(this, Pawn->GetActorLocation(), MinionStats.AlertRadius);
+	}
 	
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Black, FString::Printf(TEXT("The minion chases the player at speed %f."), GetCharacterMovement()->MaxWalkSpeed));
 }

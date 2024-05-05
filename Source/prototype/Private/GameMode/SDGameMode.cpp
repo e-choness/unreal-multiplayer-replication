@@ -6,6 +6,8 @@
 #include "GameMode/SDGameState.h"
 #include "GameMode/SDPlayerController.h"
 #include "GameMode/SDPlayerState.h"
+#include "GameMode/SDMinion.h"
+#include "Kismet/GameplayStatics.h"
 
 ASDGameMode::ASDGameMode()
 {
@@ -18,5 +20,23 @@ ASDGameMode::ASDGameMode()
 	if(PlayerPawnBPClass.Class != nullptr)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
+	}
+}
+
+void ASDGameMode::AlertMinions(AActor* AlertInstigator, const FVector& Location, float Radius)
+{
+	TArray<AActor*> Minions;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDMinion::StaticClass(), Minions);
+
+	for(const auto Minion: Minions)
+	{
+		if(AlertInstigator == Minion) continue;
+		if(const auto Distance = FVector::Distance(AlertInstigator->GetActorLocation(), Minion->GetActorLocation()); Distance<Radius)
+		{
+			if(const auto MinionCharacter = Cast<ASDMinion>(Minion))
+			{
+				MinionCharacter->GoToLocation(Location);
+			}
+		}
 	}
 }

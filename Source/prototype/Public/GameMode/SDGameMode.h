@@ -6,6 +6,8 @@
 #include "GameFramework/GameMode.h"
 #include "SDGameMode.generated.h"
 
+class AActor;
+
 /**
  * 
  */
@@ -15,5 +17,8 @@ class PROTOTYPE_API ASDGameMode : public AGameMode
 	GENERATED_BODY()
 
 	ASDGameMode();
+public:
+	UFUNCTION(BlueprintCallable, Category="Minions")
+	void AlertMinions(AActor* AlertInstigator, const FVector& Location, float Radius);
 	
 };
