@@ -22,4 +22,7 @@ struct PROTOTYPE_API FSDMinionStats
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float PatrolRestartTime = 3.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float AlertRadius = 6000.0f;
 };
