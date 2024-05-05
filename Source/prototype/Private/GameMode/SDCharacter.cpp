@@ -149,6 +149,11 @@ void ASDCharacter::SprintEnd_Server_Implementation()
 	}
 }
 
+bool ASDCharacter::IsSprinting() const
+{
+	return GetCharacterMovement()->MaxWalkSpeed == GetCharacterStats()->SprintSpeed;
+}
+
 void ASDCharacter::Interact(const FInputActionValue& Value)
 {
 	Interact_Server();
@@ -164,28 +169,23 @@ void ASDCharacter::Interact_Server_Implementation()
 	}
 }
 
-void ASDCharacter::UpdateCharacterStats(int32 CharacterLevel)
+void ASDCharacter::UpdateCharacterStats(const int32 CharacterLevel)
 {
-	auto IsSprinting = false;
-	if(GetCharacterStats())
-	{
-		IsSprinting = GetCharacterMovement()->MaxWalkSpeed == GetCharacterStats()->SprintSpeed;
-	}
-	
-	if(CharacterDataTable)
-	{
-		TArray<FSDCharacterStats*> CharacterStatesRows;
-		CharacterDataTable->GetAllRows<FSDCharacterStats>(TEXT("SDCharacter"), CharacterStatesRows);
-		if(CharacterStatesRows.Num() > 0)
-		{
-			const auto NewCharacterLevel = FMath::Clamp(CharacterLevel, 1, CharacterStatesRows.Num());
-			CharacterStats = CharacterStatesRows[NewCharacterLevel - 1];
+	if(!CharacterDataTable) return;
 
-			GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
-			if(IsSprinting)
-			{
-				SprintStart_Server();
-			}
+	TArray<FSDCharacterStats*> CharacterStatesRows;
+	CharacterDataTable->GetAllRows<FSDCharacterStats>(TEXT("SDCharacter"), CharacterStatesRows);
+
+	if(CharacterStatesRows.Num() > 0)
+	{
+		const auto NewCharacterLevel = FMath::Clamp(CharacterLevel, 1, CharacterStatesRows.Num());
+		CharacterStats = CharacterStatesRows[NewCharacterLevel - 1];
+
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterStats()->WalkSpeed;
+		
+		if(IsSprinting())
+		{
+			SprintStart_Server();
 		}
 	}
 }
@@ -231,6 +231,17 @@ void ASDCharacter::DetectInteractable()
 void ASDCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	if(IsSprinting())
+	{
+		float Noise = 1.0f;
+		if(GetCharacterStats() && GetCharacterStats()->StealthMultiplier)
+		{
+			Noise = Noise / GetCharacterStats()->StealthMultiplier;
+		}
+		NoiseEmitter->MakeNoise(this, Noise, GetActorLocation());
+		GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::White, FString::Printf(TEXT("Player is making noise at %f."), Noise));
+	}
 }
 
 // Called to bind functionality to input

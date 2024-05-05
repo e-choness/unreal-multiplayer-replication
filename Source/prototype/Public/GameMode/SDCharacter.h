@@ -79,6 +79,8 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void SprintEnd_Server();
 
+	bool IsSprinting() const;
+
 	// Interact
 	void Interact(const FInputActionValue& Value);
 
