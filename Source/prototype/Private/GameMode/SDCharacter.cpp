@@ -12,6 +12,7 @@
 #include "Engine/DataTable.h"
 #include "GameMode/SDInteractable.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Components/PawnNoiseEmitterComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -49,6 +50,10 @@ ASDCharacter::ASDCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
+
+	// Create noise emitter and set its life time
+	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("NoiseEmitter"));
+	NoiseEmitter->NoiseLifetime = 0.1f;
 
 	// Set character replicates to true
 	bReplicates = true;
