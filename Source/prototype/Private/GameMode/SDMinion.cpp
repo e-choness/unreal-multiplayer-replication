@@ -11,6 +11,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Components/CapsuleComponent.h"
 #include "GameMode/SDGameMode.h"
+#include "GameMode/SDBasePickUp.h"
 
 // Sets default values
 ASDMinion::ASDMinion()
@@ -53,6 +54,12 @@ ASDMinion::ASDMinion()
 	GetCharacterMovement()->MaxWalkSpeed = 200.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
+
+	static ConstructorHelpers::FClassFinder<ASDBasePickUp> SpawnedPickupAsset(TEXT("/Game/ShadowDungeon/Actors/BP_GoldCoinPickUp"));
+	if(SpawnedPickupAsset.Succeeded())
+	{
+		SpawnedPickup = SpawnedPickupAsset.Class;
+	}
 	
 	IsRestartPatrolling = false;
 	
@@ -137,6 +144,25 @@ void ASDMinion::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Orange, TEXT("The minion senses the player."));
 }
 
+void ASDMinion::OnDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	AController* PlayerController, AActor* PlayerInstigator)
+{
+	MinionStats.Health -= Damage;
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("Minion current health is %f"), MinionStats.Health));
+	}
+	
+	if(MinionStats.Health > 0) return;
+
+	if(SpawnedPickup)
+	{
+		GetWorld()->SpawnActor<ASDBasePickUp>(SpawnedPickup, GetActorLocation(), GetActorRotation());
+	}
+	
+	Destroy();
+}
+
 void ASDMinion::GoToLocation(const FVector& Location)
 {
 	PatrolLocation.Location = Location;
@@ -150,6 +176,7 @@ void ASDMinion::PostInitializeComponents()
 	if(GetLocalRole() != ROLE_Authority) return;
 
 	OnActorBeginOverlap.AddDynamic(this, &ASDMinion::OnBeginOverlap);
+	OnTakeAnyDamage.AddDynamic(this, &ASDMinion::OnDamage);
 	GetPawnSense()->OnSeePawn.AddDynamic(this, &ASDMinion::OnPawnDetected);
 	GetPawnSense()->OnHearNoise.AddDynamic(this, &ASDMinion::OnHearNoises);
 	NavigationSystemV1 = Cast<UNavigationSystemV1>(GetWorld()->GetNavigationSystem());

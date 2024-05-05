@@ -10,6 +10,8 @@
 class UPawnSensingComponent;
 class USphereComponent;
 class UNavigationSystemV1;
+class ASDBasePickUp;
+class UDamageType;
 struct FNavLocation;
 
 UCLASS()
@@ -29,11 +31,21 @@ class PROTOTYPE_API ASDMinion : public ACharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FSDMinionStats MinionStats;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Pick Up", meta=(AllowPrivateAccess="true"))
+	TSubclassOf<ASDBasePickUp> SpawnedPickup;
+
 public:
 	// Sets default values for this character's properties
 	ASDMinion();
 	
 	virtual void PostInitializeComponents() override;
+
+	UFUNCTION(BlueprintCallable, Category="Minion AI")
+	void GoToLocation(const FVector& Location);
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category="Minion AI")
 	void SetNextPatrolLocation();
@@ -59,18 +71,15 @@ public:
 	UFUNCTION()
 	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
-	UFUNCTION(BlueprintCallable, Category="Minion AI")
-	void GoToLocation(const FVector& Location);
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
+	UFUNCTION()
+	void OnDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* PlayerController, AActor* PlayerInstigator);
+	
 	FTimerHandle PatrolTimer;
 
 	FNavLocation PatrolLocation;
 	
 	bool IsRestartPatrolling;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
