@@ -54,10 +54,13 @@ public:
 	void OnPawnDetected(APawn* Pawn);
 
 	UFUNCTION()
-	void OnHearNoises(APawn* Pawn);
+	void OnHearNoises(APawn* PawnInstigator, const FVector& Location, float Volume);
 
 	UFUNCTION()
 	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+
+	UFUNCTION(BlueprintCallable, Category="Minion AI")
+	void GoToLocation(const FVector& Location);
 
 protected:
 	// Called when the game starts or when spawned

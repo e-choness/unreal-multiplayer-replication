@@ -118,16 +118,23 @@ void ASDMinion::OnPawnDetected(APawn* Pawn)
 	}
 }
 
-void ASDMinion::OnHearNoises(APawn* Pawn)
+void ASDMinion::OnHearNoises(APawn* PawnInstigator, const FVector& Location, float Volume)
 {
-	if(!Pawn->IsA<ASDCharacter>()) return;
+	if(!PawnInstigator->IsA<ASDCharacter>()) return;
 	GEngine->AddOnScreenDebugMessage(3, 3.0f, FColor::Yellow, TEXT("The minion hears the player."));
+	GoToLocation(Location);
 }
 
 void ASDMinion::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	if(!OtherActor->IsA<ASDCharacter>()) return;
 	GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Orange, TEXT("The minion senses the player."));
+}
+
+void ASDMinion::GoToLocation(const FVector& Location)
+{
+	PatrolLocation.Location = Location;
+	UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), PatrolLocation.Location);
 }
 
 void ASDMinion::PostInitializeComponents()
@@ -138,7 +145,7 @@ void ASDMinion::PostInitializeComponents()
 
 	OnActorBeginOverlap.AddDynamic(this, &ASDMinion::OnBeginOverlap);
 	GetPawnSense()->OnSeePawn.AddDynamic(this, &ASDMinion::OnPawnDetected);
-	// GetPawnSense()->OnHearNoise.AddDynamic(this, &ASDMinion::OnHearNoises);
+	GetPawnSense()->OnHearNoise.AddDynamic(this, &ASDMinion::OnHearNoises);
 	NavigationSystemV1 = Cast<UNavigationSystemV1>(GetWorld()->GetNavigationSystem());
 }
 
