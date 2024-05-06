@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "SDCharacter.generated.h"
 
+class USDWeaponProjectileComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -31,6 +32,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Stealth", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UPawnNoiseEmitterComponent> NoiseEmitter;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<USDWeaponProjectileComponent> Weapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
@@ -106,4 +110,6 @@ protected:
 
 public:
 	FORCEINLINE FSDCharacterStats* GetCharacterStats() const { return CharacterStats; }
+
+	FORCEINLINE USDWeaponProjectileComponent* GetWeapon() const { return Weapon; }
 };
