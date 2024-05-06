@@ -13,6 +13,7 @@
 #include "GameMode/SDInteractable.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/PawnNoiseEmitterComponent.h"
+#include "GameMode/SDWeaponProjectileComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -51,9 +52,13 @@ ASDCharacter::ASDCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;
 
-	// Create noise emitter and set its life time
+	// Create noise emitter and set its lifetime
 	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("NoiseEmitter"));
 	NoiseEmitter->NoiseLifetime = 0.1f;
+
+	Weapon = CreateDefaultSubobject<USDWeaponProjectileComponent>(TEXT("Weapon"));
+	Weapon->SetupAttachment(RootComponent);
+	Weapon->SetRelativeLocation(FVector(120.0f, 70.0f, 0.0f));
 
 	// Set character replicates to true
 	bReplicates = true;
