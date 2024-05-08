@@ -10,6 +10,7 @@
 class UInputAction;
 class UInputMappingContext;
 class ASDWeaponProjectileBase;
+class UAnimMontage;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROTOTYPE_API USDWeaponProjectileComponent : public USceneComponent
@@ -18,6 +19,9 @@ class PROTOTYPE_API USDWeaponProjectileComponent : public USceneComponent
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Projectile", meta=(AllowPrivateAccess="true"))
 	TSubclassOf<ASDWeaponProjectileBase> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Projectile", meta=(AllowPrivateAccess="true"))
+	UAnimMontage* ThrowAnimation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess="true"))
 	UInputMappingContext* WeaponMappingContext;
@@ -38,8 +42,15 @@ protected:
 
 	void Throw();
 
+	void PlayThrowAnimation() const;
+	
+	void SpawnProjectile() const;
+
 	UFUNCTION(Server, Reliable)
 	void Throw_Server();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Throw_Client();
 
 public:	
 	// Called every frame

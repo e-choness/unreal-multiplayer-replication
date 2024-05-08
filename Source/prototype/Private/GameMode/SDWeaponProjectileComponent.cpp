@@ -53,10 +53,21 @@ void USDWeaponProjectileComponent::Throw()
 	Throw_Server();
 }
 
-void USDWeaponProjectileComponent::Throw_Server_Implementation()
+void USDWeaponProjectileComponent::PlayThrowAnimation() const
 {
-	if(!ProjectileClass) return;
+	const auto Character = Cast<ASDCharacter>(GetOwner());
 
+	if(ThrowAnimation != nullptr)
+	{
+		if(const auto AnimInstance = Character->GetMesh()->GetAnimInstance(); AnimInstance != nullptr)
+		{
+			AnimInstance->Montage_Play(ThrowAnimation, 1.0f);
+		}
+	}
+}
+
+void USDWeaponProjectileComponent::SpawnProjectile() const
+{
 	const auto Character = Cast<ASDCharacter>(GetOwner());
 	const auto ProjectileSpawnLocation = GetComponentLocation();
 	const auto ProjectileSpawnRotation = GetComponentRotation();
@@ -68,6 +79,20 @@ void USDWeaponProjectileComponent::Throw_Server_Implementation()
 	GetWorld()->SpawnActor<ASDWeaponProjectileBase>(ProjectileClass, ProjectileSpawnLocation, ProjectileSpawnRotation, ProjectileParams);
 }
 
+void USDWeaponProjectileComponent::Throw_Server_Implementation()
+{
+	if(!ProjectileClass) return;
+	Throw_Client();
+	
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &USDWeaponProjectileComponent::SpawnProjectile, 0.4f, false);
+}
+
+
+void USDWeaponProjectileComponent::Throw_Client_Implementation()
+{
+	PlayThrowAnimation();
+}
 
 // Called every frame
 void USDWeaponProjectileComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

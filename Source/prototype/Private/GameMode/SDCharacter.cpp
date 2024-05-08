@@ -59,7 +59,8 @@ ASDCharacter::ASDCharacter()
 	Weapon = CreateDefaultSubobject<USDWeaponProjectileComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(RootComponent);
 	Weapon->SetRelativeLocation(FVector(120.0f, 70.0f, 0.0f));
-
+	Weapon->SetIsReplicated(true);
+	
 	// Set character replicates to true
 	bReplicates = true;
 
