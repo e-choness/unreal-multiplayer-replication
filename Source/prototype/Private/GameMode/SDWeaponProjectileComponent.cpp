@@ -84,7 +84,6 @@ void USDWeaponProjectileComponent::Throw_Server_Implementation()
 	if(!ProjectileClass) return;
 	Throw_Client();
 	
-	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &USDWeaponProjectileComponent::SpawnProjectile, 0.4f, false);
 }
 

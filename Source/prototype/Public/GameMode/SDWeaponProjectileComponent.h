@@ -52,6 +52,8 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Throw_Client();
 
+	FTimerHandle TimerHandle;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
