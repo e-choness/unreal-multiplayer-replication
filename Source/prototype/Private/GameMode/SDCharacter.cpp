@@ -14,7 +14,6 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/PawnNoiseEmitterComponent.h"
 #include "GameMode/SDWeaponProjectileComponent.h"
-#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASDCharacter::ASDCharacter()
