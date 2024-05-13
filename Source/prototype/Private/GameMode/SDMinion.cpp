@@ -77,17 +77,17 @@ void ASDMinion::SetNextPatrolLocation()
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), PatrolLocation);
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, FString::Printf(TEXT("The minion is patrolling to %f %f %f."), PatrolLocation.Location.X, PatrolLocation.Location.Y, PatrolLocation.Location.Z));
+	//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan, FString::Printf(TEXT("The minion is patrolling to %f %f %f."), PatrolLocation.Location.X, PatrolLocation.Location.Y, PatrolLocation.Location.Z));
 }
 
 void ASDMinion::RestartPatrol()
 {
 	const auto RemainingTime = GetWorldTimerManager().GetTimerRemaining(PatrolTimer);
 	
-	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Blue, FString::Printf(TEXT("Remaining patrol time: %f"), RemainingTime));
+	//GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Blue, FString::Printf(TEXT("Remaining patrol time: %f"), RemainingTime));
 	if(RemainingTime <= 0.0f)
 	{
-		GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Blue, FString::Printf(TEXT("Restart patrolling.")));
+		// GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Blue, FString::Printf(TEXT("Restart patrolling.")));
 		SetNextPatrolLocation();
 		IsRestartPatrolling = false;
 	}
@@ -115,15 +115,15 @@ void ASDMinion::Chase(APawn* Pawn)
 		GameMode->AlertMinions(this, Pawn->GetActorLocation(), MinionStats.AlertRadius);
 	}
 	
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Black, FString::Printf(TEXT("The minion chases the player at speed %f."), GetCharacterMovement()->MaxWalkSpeed));
+	// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Black, FString::Printf(TEXT("The minion chases the player at speed %f."), GetCharacterMovement()->MaxWalkSpeed));
 }
 
 void ASDMinion::OnPawnDetected(APawn* Pawn)
 {
 	if(!Pawn->IsA<ASDCharacter>()) return;
-	GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Red, TEXT("The minion sees the player."));
-	GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Red, FString::Printf(TEXT("The minion moving speed is %f."), GetCharacterMovement()->GetMaxSpeed()));
-	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("The minion velocity is %f %f %f."), GetCharacterMovement()->GetLastUpdateVelocity().X, GetCharacterMovement()->GetLastUpdateVelocity().Y, GetCharacterMovement()->GetLastUpdateVelocity().Z));
+	//GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Red, TEXT("The minion sees the player."));
+	//GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Red, FString::Printf(TEXT("The minion moving speed is %f."), GetCharacterMovement()->GetMaxSpeed()));
+	//GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("The minion velocity is %f %f %f."), GetCharacterMovement()->GetLastUpdateVelocity().X, GetCharacterMovement()->GetLastUpdateVelocity().Y, GetCharacterMovement()->GetLastUpdateVelocity().Z));
 	
 	if(!IsChasing())
 	{
@@ -134,24 +134,24 @@ void ASDMinion::OnPawnDetected(APawn* Pawn)
 void ASDMinion::OnHearNoises(APawn* PawnInstigator, const FVector& Location, float Volume)
 {
 	if(!PawnInstigator->IsA<ASDCharacter>()) return;
-	GEngine->AddOnScreenDebugMessage(3, 3.0f, FColor::Yellow, TEXT("The minion hears the player."));
+	//GEngine->AddOnScreenDebugMessage(3, 3.0f, FColor::Yellow, TEXT("The minion hears the player."));
 	GoToLocation(Location);
 }
 
 void ASDMinion::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	if(!OtherActor->IsA<ASDCharacter>()) return;
-	GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Orange, TEXT("The minion senses the player."));
+	//GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Orange, TEXT("The minion senses the player."));
 }
 
 void ASDMinion::OnDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* PlayerController, AActor* PlayerInstigator)
 {
 	MinionStats.Health -= Damage;
-	if(GetLocalRole() == ROLE_Authority)
-	{
-		GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("Minion current health is %f"), MinionStats.Health));
-	}
+	// if(GetLocalRole() == ROLE_Authority)
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("Minion current health is %f"), MinionStats.Health));
+	// }
 	
 	if(MinionStats.Health > 0) return;
 
@@ -200,7 +200,7 @@ void ASDMinion::Tick(float DeltaTime)
 
 	if(!IsMoving())
 	{
-		GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Red, TEXT("The minion stays still."));
+		// GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Red, TEXT("The minion stays still."));
 		IsRestartPatrolling = true;
 		GetWorldTimerManager().SetTimer(PatrolTimer, this, &ASDMinion::RestartPatrol, MinionStats.PatrolRestartTime, false);
 	}

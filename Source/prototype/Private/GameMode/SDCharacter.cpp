@@ -225,7 +225,7 @@ void ASDCharacter::DetectInteractable()
 
 	if(isHit && HitResult.GetActor()->GetClass()->ImplementsInterface(USDInteractable::StaticClass()))
 	{
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, SphereRadius, 12, FColor::Magenta, 1.0f);
+		// DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, SphereRadius, 12, FColor::Magenta, 1.0f);
 		InteractableActor = HitResult.GetActor();
 	}else
 	{
