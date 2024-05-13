@@ -1,6 +1,8 @@
 # Unreal Multiplayer Replication
 
-Self taught coding and implementation for Online Subsystem replication from official Unreal documentation and *Multiplayer Game Development with Unreal Engine 5* by Marco Secchi.
+Self-taught coding and implementation for Online Subsystem replication from official Unreal documentation and *Multiplayer Game Development with Unreal Engine 5* by Marco Secchi.
+
+[![show-case](./README-imgs/show-case.gif)](#requirements)
 
 ## Requirements
 
