@@ -6,6 +6,8 @@
 #include "GameFramework/GameMode.h"
 #include "SDGameMode.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogSDGameMode, Log, All);
+
 class AActor;
 
 /**
