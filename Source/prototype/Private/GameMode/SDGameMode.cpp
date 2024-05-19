@@ -3,11 +3,15 @@
 
 #include "GameMode/SDGameMode.h"
 
+#include "GameMode/SDCustomLogs.h"
 #include "GameMode/SDGameState.h"
 #include "GameMode/SDPlayerController.h"
 #include "GameMode/SDPlayerState.h"
 #include "GameMode/SDMinion.h"
 #include "Kismet/GameplayStatics.h"
+#include "Logging/StructuredLog.h"
+
+DEFINE_LOG_CATEGORY(LogSDGameMode)
 
 ASDGameMode::ASDGameMode()
 {
@@ -25,6 +29,12 @@ ASDGameMode::ASDGameMode()
 
 void ASDGameMode::AlertMinions(AActor* AlertInstigator, const FVector& Location, float Radius)
 {
+	// Both LOG and LOGFMT are showing up, they are working
+	UE_LOG(LogSDGameMode, Log, TEXT("Regular, alert minions")); 
+	UE_LOGFMT(LogSDGameMode, Log, "Alert Minions.");
+	
+	UE_LOGFMT(LogPrototype, Log, "Custom, Alert Minions."); // This one never shows up in the output log section
+	
 	TArray<AActor*> Minions;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASDMinion::StaticClass(), Minions);
 
