@@ -8,6 +8,6 @@ public class prototype : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "ChaosVehicles", "NavigationSystem", "AIModule" });
+		PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "ChaosVehicles", "NavigationSystem", "AIModule", "PlayFab", "PlayFabCpp", "PlayFabCommon" });
 	}
 }
