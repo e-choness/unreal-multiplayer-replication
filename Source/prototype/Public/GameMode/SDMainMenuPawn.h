@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "SD_MainMenuPawn.generated.h"
+#include "SDMainMenuPawn.generated.h"
 
 class UArrowComponent;
 class UCameraComponent;
 
 UCLASS()
-class PROTOTYPE_API ASD_MainMenuPawn : public APawn
+class PROTOTYPE_API ASDMainMenuPawn : public APawn
 {
 	GENERATED_BODY()
     
@@ -25,7 +25,7 @@ class PROTOTYPE_API ASD_MainMenuPawn : public APawn
 	
 public:
 	// Sets default values for this pawn's properties
-	ASD_MainMenuPawn();
+	ASDMainMenuPawn();
 
 protected:
 	// Called when the game starts or when spawned
