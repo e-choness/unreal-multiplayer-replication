@@ -32,7 +32,7 @@ It leverages official Unreal documentation and _Multiplayer Game Development wit
 1. Clone the repository
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/e-choness/shadow-dungeon.git
    ```
 
 2. Running the Game
